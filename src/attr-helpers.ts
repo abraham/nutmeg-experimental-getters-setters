@@ -1,12 +1,6 @@
 import { html, render, TemplateResult } from 'lit-html';
 
 export default class AttrHelpers extends HTMLElement {
-  /** The constructor always attaches a shadowRoot so no need for it to be null. */
-  public shadowRoot: ShadowRoot;
-
-  public four: string[] = [];
-  public five: object = {};
-
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -34,7 +28,7 @@ export default class AttrHelpers extends HTMLElement {
 
   /** Rerender the element. */
   render() {
-    render(this.template, this.shadowRoot);
+    render(this.template, this.shadowRoot as ShadowRoot);
   }
 
   /** Support lazy properties https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties */
@@ -49,43 +43,91 @@ export default class AttrHelpers extends HTMLElement {
   }
 
   get one(): string | null {
-    return this.getAttribute('one');
+    return this.getString('one');
   }
-
   set one(value: string | null) {
-    if (value) {
-      this.setAttribute('one', value);
-    } else {
-      this.removeAttribute('one');
-    }
+    this.setString('one', value);
   }
 
   get two(): number | null {
-    if (this.hasAttribute('two')) {
-      return Number(this.getAttribute('two'));
+    return this.getNumber('two');
+  }
+  set two(value: number | null) {
+    this.setNumber('two', value);
+  }
+
+  get three(): boolean {
+    return this.getBoolean('three');
+  }
+  set three(value: boolean) {
+    this.setBoolean('three', value);
+  }
+
+  get four(): string[] {
+    return this.getProperty('four');
+  }
+  set four(value: string[]) {
+    this.setProperty('four', value);
+  }
+
+  get five(): object {
+    return this.getProperty('four');
+  }
+  set five(value: object) {
+    this.setProperty('four', value);
+  }
+
+  private getProperty(key: string): any {
+    return (<any>this)[key];
+  }
+  private setProperty(key: string, value: any) {
+    if (value) {
+      (<any>this)[key] = value;
+    } else {
+      delete (<any>this)[key];
+    }
+    this.render();
+  }
+
+  private getString(key: string): string | null {
+    return this.getAttribute(key);
+  }
+  private setString(key: string, value: string | null) {
+    if (value) {
+      this.setAttribute(key, value);
+    } else {
+      this.removeAttribute(key);
+    }
+    this.render();
+  }
+
+  private getNumber(key: string): number | null {
+    const value = this.getAttribute(key);
+    if (value) {
+      return Number(value);
     } else {
       return null;
     }
   }
-
-  set two(value: number | null) {
+  private setNumber(key: string, value: number | null) {
     if (value) {
-      this.setAttribute('two', String(value));
+      this.setAttribute(key, String(value));
     } else {
-      this.removeAttribute('two');
+      this.removeAttribute(key);
     }
+    this.render();
   }
 
-  get three(): boolean {
-    return this.hasAttribute('three');
+  private getBoolean(key: string): boolean {
+    return this.hasAttribute(key);
   }
-
-  set three(value: boolean) {
+  private setBoolean(key: string, value: boolean) {
     if (value) {
-      this.setAttribute('three', '');
+      this.setAttribute(key, '');
     } else {
-      this.removeAttribute('three');
+      this.removeAttribute(key);
     }
+    this.render();
   }
 
   /** Styling for the element. */
